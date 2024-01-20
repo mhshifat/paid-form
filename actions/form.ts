@@ -71,3 +71,76 @@ export async function getFormById(id: number) {
   });
   return forms;
 }
+
+export async function getFormContentByUrl(url: string) {
+  return await prisma.form.update({
+    select: {
+      content: true
+    },
+    data: {
+      visits: { increment: 1 }
+    },
+    where: {
+      shareUrl: url
+    }
+  })
+}
+
+export async function getFormWithSubmissions(id: number) {
+  const user = await currentUser();
+  if (!user) throw new UserNotFoundErr();
+  return await prisma.form.findUnique({
+    include: {
+      formSubmissions: true
+    },
+    where: {
+      id,
+      userId: user.id
+    }
+  })
+}
+
+export async function saveForm(url: string, content: string) {
+  return await prisma.form.update({
+    data: {
+      submissions: { increment: 1 },
+      formSubmissions: {
+        create: {
+          content
+        }
+      }
+    },
+    where: {
+      shareUrl: url,
+      published: true
+    }
+  })
+}
+
+export async function updateFormContent(id: number, jsonContent: string) {
+  const user = await currentUser();
+  if (!user) throw new UserNotFoundErr();
+  return await prisma.form.update({
+    where: {
+      userId: user.id,
+      id
+    },
+    data: {
+      content: jsonContent
+    }
+  })
+}
+
+export async function publishForm(id: number) {
+  const user = await currentUser();
+  if (!user) throw new UserNotFoundErr();
+  return await prisma.form.update({
+    where: {
+      userId: user.id,
+      id
+    },
+    data: {
+      published: true
+    }
+  })
+}

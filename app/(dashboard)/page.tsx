@@ -92,7 +92,7 @@ interface StatsCardProps {
   className: string;
 }
 
-function StatsCard({
+export function StatsCard({
   title,
   icon,
   helperText,
